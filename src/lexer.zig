@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const tokenNS = @import("./token.zig");
 const Token = tokenNS.Token;
 const TokenType = tokenNS.TokenType;
@@ -25,17 +27,19 @@ pub const Lexer = struct {
 
     pub fn next(self: *Self) SpanToken {
         if (self.next_char()) |c| {
-            const token = switch (c) {
+            return switch (c) {
+                '\n' => self.handle_newline(),
                 '0'...'9' => self.scan_number(c),
                 else => self.make_token(.unknown, &[_]u8{c}),
             };
-            _ = token;
         }
 
         return self.make_token(.eof, "");
     }
 
     fn next_char(self: *Self) ?u8 {
+        std.debug.print("i = {}\n", .{self.i});
+
         if (self.i == self.len) {
             return null;
         }
@@ -47,12 +51,14 @@ pub const Lexer = struct {
         if (c == '\r') {
             if (self.peek_char()) |d| {
                 if (d == '\n') {
+                    std.debug.print("norm\n", .{});
                     return self.next_char();
                 }
             }
         }
 
         if (c == '\n') {
+            std.debug.print("newline\n", .{});
             self.line += 1;
             self.col = 0;
         }
@@ -81,6 +87,10 @@ pub const Lexer = struct {
                 .col = self.col,
             },
         );
+    }
+
+    fn handle_newline(self: Self) SpanToken {
+        return self.make_token(.nl, "\n");
     }
 
     fn scan_number(self: Self, first_digit: u8) SpanToken {

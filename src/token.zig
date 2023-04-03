@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Token = struct {
     kind: TokenType,
     lexeme: []const u8,
@@ -17,9 +19,12 @@ pub const TokenType = enum {
     float,
     string,
 
-    unknown,
+    end_of_statement,
 
+    nl,
     eof,
+
+    unknown,
 };
 
 pub const SpanToken = struct {
@@ -35,6 +40,11 @@ pub const SpanToken = struct {
             .start = start,
             .end = end,
         };
+    }
+
+    pub fn format(self: Self) []const u8 {
+        _ = self;
+        return "";
     }
 };
 

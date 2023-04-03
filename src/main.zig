@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const lexerNS = @import("./lexer.zig");
+const tokenNS = @import("./token.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -14,7 +15,14 @@ pub fn main() !void {
         1 => std.debug.print("TODO: Run REPL", .{}),
         2 => {
             var lexer = lexerNS.Lexer.new(args[1]);
-            std.debug.print("{}", .{lexer.next()});
+
+            while (true) {
+                const token = lexer.next();
+                std.debug.print("{}\n", .{token});
+                if (token.token.kind == tokenNS.TokenType.eof) {
+                    break;
+                }
+            }
         },
         else => {
             std.debug.print("TODO", .{});
