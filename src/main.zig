@@ -13,19 +13,7 @@ pub fn main() !void {
 
     switch (args.len) {
         1 => std.debug.print("TODO: Run REPL", .{}),
-        2 => {
-            var lexer = lexerNS.Lexer.new(args[1]);
-
-            while (true) {
-                const token = lexer.next();
-                std.debug.print("{}\n", .{token});
-                if (token.token.kind == tokenNS.TokenType.eof) {
-                    break;
-                }
-            }
-        },
-        else => {
-            std.debug.print("TODO", .{});
-        },
+        2 => lexerNS.display_tokens(args[1]),
+        else => std.debug.print("TODO", .{}),
     }
 }
