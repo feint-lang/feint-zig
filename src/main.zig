@@ -1,7 +1,5 @@
 const std = @import("std");
-
-const lexerNS = @import("./lexer.zig");
-const tokenNS = @import("./token.zig");
+const Driver = @import("./driver.zig").Driver;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -13,7 +11,10 @@ pub fn main() !void {
 
     switch (args.len) {
         1 => std.debug.print("TODO: Run REPL", .{}),
-        2 => lexerNS.display_tokens(args[1]),
+        2 => {
+            const driver = Driver.init();
+            try driver.display_tokens(args[1]);
+        },
         else => std.debug.print("TODO", .{}),
     }
 }
