@@ -42,6 +42,8 @@ pub const Token = struct {
     );
 
     pub const Kind = enum {
+        scope,
+
         // Groupings ---------------------------------------------------
         lparen,
         rparen,
@@ -95,6 +97,8 @@ pub const Token = struct {
 
         pub fn format(self: Kind) []const u8 {
             return switch (self) {
+                .scope => "->",
+
                 // Groupings -------------------------------------------
                 .lparen => "(",
                 .rparen => ")",

@@ -42,7 +42,7 @@ pub const Lexer = struct {
         return Self{
             .allocator = allocator,
             .source = source,
-            .len = @intCast(u32, source.len),
+            .len = @intCast(source.len),
             .pos = 0,
             .line = 1,
             .col = 0,
@@ -97,7 +97,7 @@ pub const Lexer = struct {
                 '*' => self.make_token(.star),
                 '/' => self.make_token(.slash),
                 '+' => self.make_token(.plus),
-                '-' => self.make_token(.dash),
+                '-' => if (self.next_char_is('>')) self.make_token(.scope) else self.make_token(.dash),
                 // Errors ----------------------------------------------
                 '\t' => self.make_err(error.IllegalTab),
                 else => self.make_err(error.UnexpectedChar),
@@ -139,6 +139,11 @@ pub const Lexer = struct {
                 .end = self.pos - 1,
             },
         };
+    }
+
+    fn skip_next_and_make_token(self: *Self, kind: Token.Kind) TokenResult {
+        _ = self.next_char();
+        return self.make_token(kind);
     }
 
     fn make_err(self: Self, err: TokenErr.Kind) TokenResult {
@@ -258,6 +263,14 @@ pub const Lexer = struct {
         }
 
         return c;
+    }
+
+    fn next_char_is(self: *Self, c: u8) bool {
+        if (self.peek_char() == c) {
+            _ = self.next_char();
+            return true;
+        }
+        return false;
     }
 
     /// Peek at next character without consuming it.
