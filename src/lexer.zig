@@ -84,12 +84,7 @@ pub const Lexer = struct {
                 'a'...'z' => self.scan_keyword_or_ident(),
                 '@' => self.make_token(.always),
                 // Types -----------------------------------------------
-                '0' => if (self.peek_char()) |d| switch (d) {
-                    'b', 'B' => self.scan_number_base_2(),
-                    'o', 'O' => self.scan_number_base_8(),
-                    'x', 'X' => self.scan_number_base_16(),
-                    else => self.scan_number_base_10(),
-                } else self.make_token(.int),
+                '0' => self.scan_zero(),
                 '1'...'9' => self.scan_number_base_10(),
                 '"' => self.scan_str(c),
                 '\'' => self.scan_str(c),
@@ -97,7 +92,10 @@ pub const Lexer = struct {
                 '*' => self.make_token(.star),
                 '/' => self.make_token(.slash),
                 '+' => self.make_token(.plus),
-                '-' => if (self.next_char_is('>')) self.make_token(.scope) else self.make_token(.dash),
+                '-' => switch (self.next_char_is('>')) {
+                    true => self.make_token(.scope),
+                    false => self.make_token(.dash),
+                },
                 // Errors ----------------------------------------------
                 '\t' => self.make_err(error.IllegalTab),
                 else => self.make_err(error.UnexpectedChar),
@@ -183,6 +181,18 @@ pub const Lexer = struct {
             return self.make_token(kind);
         }
         return self.make_token(.ident);
+    }
+
+    fn scan_zero(self: *Self) ?TokenResult {
+        if (self.peek_char()) |d| {
+            return switch (d) {
+                'b', 'B' => self.scan_number_base_2(),
+                'o', 'O' => self.scan_number_base_8(),
+                'x', 'X' => self.scan_number_base_16(),
+                else => self.scan_number_base_10(),
+            };
+        }
+        return self.scan_number_base_10();
     }
 
     fn scan_number_base_10(self: *Self) ?TokenResult {
